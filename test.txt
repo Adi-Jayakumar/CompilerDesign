@@ -1,0 +1,9 @@
+
+int fib()
+{
+    float n;
+    {
+        bool n;
+        x = false;
+    }
+}
