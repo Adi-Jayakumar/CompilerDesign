@@ -67,6 +67,7 @@ struct IntNode : Expr
     };
 
     virtual Type Analyse(SemanticAnalyser &) override;
+    virtual llvm::Value* Compile(Compiler &) override;
 };
 
 struct FloatNode : Expr
@@ -83,6 +84,7 @@ struct FloatNode : Expr
     };
 
     virtual Type Analyse(SemanticAnalyser &) override;
+    virtual llvm::Value* Compile(Compiler &) override;
 };
 
 struct BoolNode : Expr
@@ -99,6 +101,7 @@ struct BoolNode : Expr
     };
 
     virtual Type Analyse(SemanticAnalyser &) override;
+    virtual llvm::Value* Compile(Compiler &) override;
 };
 
 struct UnaryNode : Expr
@@ -115,6 +118,7 @@ struct UnaryNode : Expr
     };
 
     virtual Type Analyse(SemanticAnalyser &) override;
+    virtual llvm::Value* Compile(Compiler &) override;
 };
 
 struct BinaryNode : Expr
@@ -134,6 +138,7 @@ struct BinaryNode : Expr
     };
 
     virtual Type Analyse(SemanticAnalyser &) override;
+    virtual llvm::Value* Compile(Compiler &) override;
 };
 
 struct IdentifierNode : Expr
@@ -149,6 +154,7 @@ struct IdentifierNode : Expr
     };
 
     virtual Type Analyse(SemanticAnalyser &) override;
+    virtual llvm::Value* Compile(Compiler &) override;
 };
 
 struct AssignNode : Expr
@@ -168,6 +174,7 @@ struct AssignNode : Expr
     };
 
     virtual Type Analyse(SemanticAnalyser &) override;
+    virtual llvm::Value* Compile(Compiler &) override;
 };
 
 struct FunctionCallNode : Expr
@@ -193,6 +200,7 @@ struct FunctionCallNode : Expr
     };
 
     virtual Type Analyse(SemanticAnalyser &) override;
+    virtual llvm::Value* Compile(Compiler &) override;
 };
 
 struct CoercionNode : Expr
@@ -207,6 +215,7 @@ struct CoercionNode : Expr
     };
 
     virtual Type Analyse(SemanticAnalyser &) override;
+    virtual llvm::Value* Compile(Compiler &) override;
 };
 
 //------------------------------------------STATEMENTS------------------------------------------//
@@ -224,6 +233,7 @@ struct ExprStmtNode : Stmt
     };
 
     virtual void Analyse(SemanticAnalyser &) override;
+    virtual llvm::Value *Compile(Compiler &) override;
 };
 
 struct WhileNode : Stmt
@@ -243,6 +253,7 @@ struct WhileNode : Stmt
     };
 
     virtual void Analyse(SemanticAnalyser &) override;
+    virtual llvm::Value *Compile(Compiler &) override;
 };
 
 struct IfElseNode : Stmt
@@ -267,6 +278,7 @@ struct IfElseNode : Stmt
     };
 
     virtual void Analyse(SemanticAnalyser &) override;
+    virtual llvm::Value *Compile(Compiler &) override;
 };
 
 struct ReturnNode : Stmt
@@ -287,6 +299,7 @@ struct ReturnNode : Stmt
     };
 
     virtual void Analyse(SemanticAnalyser &) override;
+    virtual llvm::Value *Compile(Compiler &) override;
 };
 
 struct LocalDeclNode : Stmt
@@ -306,6 +319,7 @@ struct LocalDeclNode : Stmt
     };
 
     virtual void Analyse(SemanticAnalyser &) override;
+    virtual llvm::Value *Compile(Compiler &) override;
 };
 
 struct BlockNode : Stmt
@@ -331,6 +345,7 @@ struct BlockNode : Stmt
     };
 
     virtual void Analyse(SemanticAnalyser &) override;
+    virtual llvm::Value *Compile(Compiler &) override;
 };
 
 struct FunctionDeclNode : Stmt
@@ -366,6 +381,7 @@ struct FunctionDeclNode : Stmt
     };
 
     virtual void Analyse(SemanticAnalyser &) override;
+    virtual llvm::Value *Compile(Compiler &) override;
 };
 
 struct ExternNode : Stmt
@@ -398,4 +414,5 @@ struct ExternNode : Stmt
     };
 
     virtual void Analyse(SemanticAnalyser &) override;
+    virtual llvm::Value *Compile(Compiler &) override;
 };

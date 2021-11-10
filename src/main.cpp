@@ -1,4 +1,5 @@
 #include "astnodes.h"
+#include "compiler.h"
 #include "lexer.h"
 #include "parser.h"
 #include "semanticanalyser.h"
@@ -24,13 +25,13 @@
 #include <memory>
 #include <string>
 
-//===----------------------------------------------------------------------===//
-// Code Generation
-//===----------------------------------------------------------------------===//
+// //===----------------------------------------------------------------------===//
+// // Code Generation
+// //===----------------------------------------------------------------------===//
 
-static llvm::LLVMContext TheContext;
-static llvm::IRBuilder<> Builder(TheContext);
-static std::unique_ptr<llvm::Module> TheModule;
+// static llvm::LLVMContext TheContext;
+// static llvm::IRBuilder<> Builder(TheContext);
+// static std::unique_ptr<llvm::Module> TheModule;
 
 //===----------------------------------------------------------------------===//
 // AST Printer
@@ -77,8 +78,8 @@ int main(int argc, char **argv)
     std::cout << "Lexing finished\n\n\n\n"
               << std::endl;
 
-    // Make the module, which holds all the code.
-    TheModule = std::make_unique<llvm::Module>("mini-c", TheContext);
+    // // Make the module, which holds all the code.
+    // TheModule = std::make_unique<llvm::Module>("mini-c", TheContext);
 
     //--------------------PRINTING PARSED PROGRAM--------------------//
 
@@ -111,16 +112,8 @@ int main(int argc, char **argv)
 
     //--------------------CODE GENERATION--------------------//
 
-    const char *Filename = "output.ll";
-    std::error_code EC;
-    llvm::raw_fd_ostream dest(Filename, EC, llvm::sys::fs::F_None);
-
-    if (EC)
-    {
-        llvm::errs() << "Could not open file: " << EC.message();
-        return 1;
-    }
-    // TheModule->print(errs(), nullptr); // print IR to terminal
-    TheModule->print(dest, nullptr);
+    Compiler c;
+    c.PrintCode();
+    c.WriteCode();
     return 0;
 }
