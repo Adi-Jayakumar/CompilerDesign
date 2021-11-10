@@ -44,8 +44,25 @@ Type SemanticAnalyser::AnalyseBinaryNode(BinaryNode *b)
     Type left = b->left->Analyse(*this);
     Type right = b->right->Analyse(*this);
     std::optional<Type> type = symbols.CheckBinaryOperatorUse(left, b->loc.type, right);
+
     if (!type)
         ReportSemanticError("bad binary", b->loc);
+
+    // type 'float' is infectious, if one argument of a binary operator is a float
+    // and the other is not, both must be converted to float before executing the
+    // operation
+
+    if (left == Type::FLOAT && right != Type::FLOAT)
+    {
+        b->right = std::make_shared<CoercionNode>(Type::FLOAT, b->right, b->right->loc);
+        b->right->Analyse(*this);
+    }
+    else if (left != Type::FLOAT && right == Type::FLOAT)
+    {
+        b->left = std::make_shared<CoercionNode>(Type::FLOAT, b->left, b->left->loc);
+        b->left->Analyse(*this);
+    }
+
     return b->type = type.value();
 }
 
@@ -67,10 +84,14 @@ Type SemanticAnalyser::AnalyseAssignNode(AssignNode *a)
     Type target = v_targ.value().type;
     Type value = a->val->Analyse(*this);
 
-    // TODO COERCIONS HERE
-
     if (!symbols.CanAssign(target, value))
         ReportSemanticError("bad assign types", a->loc);
+
+    if (target != value)
+    {
+        a->val = std::make_shared<CoercionNode>(target, a->val, a->val->loc);
+        a->val->Analyse(*this);
+    }
 
     return a->type = target;
 }
@@ -87,11 +108,27 @@ Type SemanticAnalyser::AnalyseFunctionCallNode(FunctionCallNode *fc)
     if (!func)
         ReportSemanticError("bad function call", fc->loc);
 
+    // SymbolTable should have ensured that the FunctionCallNode and the returned FuncID
+    // have the same number of arguments so this is fine
+
+    std::vector<Type> actual_argtypes = func.value().args;
+
+    for (size_t i = 0; i < fc->args.size(); i++)
+    {
+        if (actual_argtypes[i] != argtypes[i])
+        {
+            fc->args[i] = std::make_shared<CoercionNode>(actual_argtypes[i], fc->args[i], fc->args[i]->loc);
+            fc->args[i]->Analyse(*this);
+        }
+    }
+
     return fc->type = func.value().ret;
 }
 
 Type SemanticAnalyser::AnalyseCoercionNode(CoercionNode *c)
 {
+    // should never be triggered
+    assert(symbols.CanAssign(c->type, c->exp->type));
     return c->type;
 }
 
@@ -214,6 +251,11 @@ Type AssignNode::Analyse(SemanticAnalyser &sa)
 Type FunctionCallNode::Analyse(SemanticAnalyser &sa)
 {
     return sa.AnalyseFunctionCallNode(this);
+}
+
+Type CoercionNode::Analyse(SemanticAnalyser &sa)
+{
+    return sa.AnalyseCoercionNode(this);
 }
 
 //------------------------------------------STATEMENTS------------------------------------------//

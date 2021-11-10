@@ -79,7 +79,7 @@ void SymbolTable::ClearCurrentScope()
 
 bool SymbolTable::AddFunction(const Type ret, const std::string &name, const std::vector<Type> &args)
 {
-    if (ResolveFunction(name, args))
+    if (IsDefinedBefore(name, args))
         return false;
     func_table[name].push_back(FuncID(ret, name, args));
     return true;
@@ -128,4 +128,14 @@ bool SymbolTable::CanAssignAll(const std::vector<Type> &actual, const std::vecto
     }
 
     return true;
+}
+
+bool SymbolTable::IsDefinedBefore(const std::string &name, const std::vector<Type> &args)
+{
+    for (const auto &func : func_table[name])
+    {
+        if (AreTypesEqual(func.args, args))
+            return true;
+    }
+    return false;
 }

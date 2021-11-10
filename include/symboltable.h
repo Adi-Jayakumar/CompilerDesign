@@ -135,6 +135,8 @@ class SymbolTable
     bool AreTypesEqual(const std::vector<Type> &actual, const std::vector<Type> &supplied) const;
     bool CanAssignAll(const std::vector<Type> &actual, const std::vector<Type> &supplied) const;
 
+    bool IsDefinedBefore(const std::string &name, const std::vector<Type> &args);
+
 public:
     size_t depth;
     SymbolTable() = default;
@@ -147,7 +149,7 @@ public:
     //-------------------------VARIABLES-------------------------//
 
     bool AddVariable(const Type type, const std::string &name);
-    // returns pointer to last variable in scope or nullptr if no such variable exists
+    // returns std::optional of last variable in scope or nullptr if no such variable exists
     std::optional<VarID> ResolveVariable(const std::string &name);
 
     void ClearCurrentScope();
@@ -155,6 +157,6 @@ public:
     //-------------------------FUNCTIONS-------------------------//
 
     bool AddFunction(const Type ret, const std::string &name, const std::vector<Type> &args);
-    // returns a pointer to the corresponding function or nullptr if no such function exists
+    // returns a std::optional of the corresponding function or nullptr if no such function exists
     std::optional<FuncID> ResolveFunction(const std::string &name, const std::vector<Type> &args);
 };

@@ -103,6 +103,12 @@ int main(int argc, char **argv)
     SemanticAnalyser sa;
     sa.AnalyseProgram(parse);
 
+    std::cout << "Printing semantically analysed program\n\n"
+              << std::endl;
+
+    for (auto &decl : parse)
+        std::cout << decl->to_string() << std::endl;
+
     //--------------------CODE GENERATION--------------------//
 
     const char *Filename = "output.ll";

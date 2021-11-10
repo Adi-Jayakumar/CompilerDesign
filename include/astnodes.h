@@ -15,7 +15,7 @@
 
 class SemanticAnalyser;
 
-/// ASTnode - Base struct for all AST nodes.
+/// Expr - Base struct for all expression nodes.
 struct Expr
 {
     Type type;
@@ -201,6 +201,8 @@ struct CoercionNode : Expr
     {
         return ExprType::to_string(type) + "(" + exp->to_string() + ")";
     };
+
+    virtual Type Analyse(SemanticAnalyser &) override;
 };
 
 //------------------------------------------STATEMENTS------------------------------------------//
