@@ -13,7 +13,9 @@
 #pragma clang diagnostic pop
 #endif
 
+// Forward declarations of SemanticAnalyser and Compiler classes
 class SemanticAnalyser;
+class Compiler;
 
 /// Expr - Base struct for all expression nodes.
 struct Expr
@@ -25,11 +27,12 @@ struct Expr
 
     virtual ~Expr() {}
 
-    virtual llvm::Value *codegen() { return nullptr; };
     virtual std::string to_string() const = 0;
 
     // implemented in "semanticanalyser.cpp" for all derived classes
     virtual Type Analyse(SemanticAnalyser &) = 0;
+    // implemented in "compiler.cpp" for all derived classes
+    virtual llvm::Value *Compile(Compiler &) = 0;
 };
 
 struct Stmt
@@ -38,11 +41,12 @@ struct Stmt
     Stmt(const Token &_loc) : loc(_loc){};
     virtual ~Stmt() {}
 
-    virtual llvm::Value *codegen() { return nullptr; };
     virtual std::string to_string() const = 0;
 
     // implemented in "semanticanalyser.cpp" for all derived classes
     virtual void Analyse(SemanticAnalyser &) = 0;
+    // implemented in "compiler.cpp" for all derived classes
+    virtual llvm::Value *Compile(Compiler &) = 0;
 };
 
 template <typename T>
