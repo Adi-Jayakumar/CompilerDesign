@@ -78,9 +78,6 @@ int main(int argc, char **argv)
     std::cout << "Lexing finished\n\n\n\n"
               << std::endl;
 
-    // // Make the module, which holds all the code.
-    // TheModule = std::make_unique<llvm::Module>("mini-c", TheContext);
-
     //--------------------PRINTING PARSED PROGRAM--------------------//
 
     std::ifstream new_file(argv[1]);
@@ -110,9 +107,17 @@ int main(int argc, char **argv)
     for (auto &decl : parse)
         std::cout << decl->to_string() << std::endl;
 
+    std::cout << "\n\n"
+              << std::endl;
+
     //--------------------CODE GENERATION--------------------//
 
     Compiler c;
+    for (auto &decl : parse)
+        decl->Compile(c);
+
+    std::cout << "\n\n\nCode Gen:"
+              << std::endl;
     c.PrintCode();
     c.WriteCode();
     return 0;

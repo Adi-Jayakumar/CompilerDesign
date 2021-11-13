@@ -52,6 +52,20 @@ bool SymbolTable::AddVariable(const Type type, const std::string &name)
     return true;
 }
 
+bool SymbolTable::AddVariable(const Type type, const std::string &name, llvm::AllocaInst *alloca)
+{
+    VarID candidate(type, name, depth, alloca);
+
+    for (int i = var_table[name].size() - 1; i >= 0; i--)
+    {
+        if (candidate == var_table[name][i])
+            return false;
+    }
+
+    var_table[name].push_back(candidate);
+    return true;
+}
+
 std::optional<VarID> SymbolTable::ResolveVariable(const std::string &name)
 {
     std::vector<VarID> same_names = var_table[name];
@@ -82,6 +96,14 @@ bool SymbolTable::AddFunction(const Type ret, const std::string &name, const std
     if (IsDefinedBefore(name, args))
         return false;
     func_table[name].push_back(FuncID(ret, name, args));
+    return true;
+}
+
+bool SymbolTable::AddFunction(const Type ret, const std::string &name, const std::vector<Type> &args, llvm::Function *f)
+{
+    if (IsDefinedBefore(name, args))
+        return false;
+    func_table[name].push_back(FuncID(ret, name, args, f));
     return true;
 }
 

@@ -1,6 +1,18 @@
 #pragma once
 #include "token.h"
 #include "type.h"
+
+#if defined(__clang__)
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Wunused-parameter"
+#endif
+
+#include "llvm/IR/Instructions.h"
+
+#if defined(__clang__)
+#pragma clang diagnostic pop
+#endif
+
 #include <optional>
 #include <ostream>
 #include <string>
@@ -12,8 +24,21 @@ struct VarID
     Type type;
     std::string name;
     size_t depth;
+    llvm::AllocaInst *llvm_value;
 
-    VarID(const Type _type, const std::string &_name, const size_t _depth) : type(_type), name(_name), depth(_depth){};
+    VarID(const Type _type,
+          const std::string &_name,
+          const size_t _depth) : type(_type),
+                                 name(_name),
+                                 depth(_depth),
+                                 llvm_value(nullptr){};
+    VarID(const Type _type,
+          const std::string &_name,
+          const size_t _depth,
+          llvm::AllocaInst *_llvm_value) : type(_type),
+                                           name(_name),
+                                           depth(_depth),
+                                           llvm_value(_llvm_value){};
 };
 
 std::ostream &operator<<(std::ostream &out, const VarID &v);
@@ -24,12 +49,21 @@ struct FuncID
     Type ret;
     std::string name;
     std::vector<Type> args;
+    llvm::Function *llvm_func;
 
     FuncID(const Type _ret,
            const std::string &_name,
            const std::vector<Type> &_args) : ret(_ret),
                                              name(_name),
                                              args(_args){};
+
+    FuncID(const Type _ret,
+           const std::string &_name,
+           const std::vector<Type> &_args,
+           llvm::Function *_llvm_func) : ret(_ret),
+                                         name(_name),
+                                         args(_args),
+                                         llvm_func(_llvm_func){};
 };
 
 class SymbolTable
@@ -149,6 +183,7 @@ public:
     //-------------------------VARIABLES-------------------------//
 
     bool AddVariable(const Type type, const std::string &name);
+    bool AddVariable(const Type type, const std::string &name, llvm::AllocaInst *alloca);
     // returns std::optional of last variable in scope or nullptr if no such variable exists
     std::optional<VarID> ResolveVariable(const std::string &name);
 
@@ -157,6 +192,7 @@ public:
     //-------------------------FUNCTIONS-------------------------//
 
     bool AddFunction(const Type ret, const std::string &name, const std::vector<Type> &args);
+    bool AddFunction(const Type ret, const std::string &name, const std::vector<Type> &args, llvm::Function *f);
     // returns a std::optional of the corresponding function or nullptr if no such function exists
     std::optional<FuncID> ResolveFunction(const std::string &name, const std::vector<Type> &args);
 };
