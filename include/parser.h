@@ -29,7 +29,6 @@ public:
 
     std::vector<SP<Stmt>> ParseDeclarationList();
     SP<Stmt> ParseDeclaration();
-    // TODO - Handle 'int f(void);' case;
     std::vector<std::pair<Type, std::string>> ParseFunctionArgs();
 
     SP<Stmt> ParseStatement();

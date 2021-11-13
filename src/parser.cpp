@@ -127,6 +127,14 @@ SP<Stmt> Parser::ParseDeclaration()
 std::vector<std::pair<Type, std::string>> Parser::ParseFunctionArgs()
 {
     std::vector<std::pair<Type, std::string>> res;
+
+    if (cur.type == VOID_TOK)
+    {
+        GetNextToken();
+        CheckCurType(RPAR, "'void' in function argument declarations must be followed by ')'");
+        return res;
+    }
+
     while (cur.type != RPAR && cur.type != EOF_TOK)
     {
         std::pair<Type, std::string> cur_arg;

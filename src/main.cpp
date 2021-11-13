@@ -44,6 +44,25 @@ inline llvm::raw_ostream &operator<<(llvm::raw_ostream &os,
     return os;
 }
 
+void DumpTokens(const std::string &file_name)
+{
+    std::ifstream file(file_name);
+    Lexer lex = Lexer(file);
+
+    Token cur = lex.GetToken();
+    size_t count = 0;
+    while (cur.type != EOF_TOK)
+    {
+        std::cout << "Token: " << cur.lexeme << " with type " << cur.type << " at location " << cur.line_no << ":" << cur.column_no << std::endl;
+        cur = lex.GetToken();
+        if (count > 10)
+            exit(1);
+        ++count;
+    }
+    std::cout << "Lexing finished\n\n\n\n"
+              << std::endl;
+}
+
 //===----------------------------------------------------------------------===//
 // Main driver code.
 //===----------------------------------------------------------------------===//
@@ -67,21 +86,11 @@ int main(int argc, char **argv)
 
     //--------------------PRINTING LEXED PROGRAM--------------------//
 
-    Lexer lex(file);
-
-    Token cur = lex.GetToken();
-    while (cur.type != EOF_TOK)
-    {
-        std::cout << "Token: " << cur.lexeme << " with type " << cur.type << std::endl;
-        cur = lex.GetToken();
-    }
-    std::cout << "Lexing finished\n\n\n\n"
-              << std::endl;
+    // DumpTokens(argv[1]);
 
     //--------------------PRINTING PARSED PROGRAM--------------------//
 
-    std::ifstream new_file(argv[1]);
-    Parser q(new_file);
+    Parser q(file);
 
     std::vector<SP<Stmt>> parse = q.ParseProgram();
 

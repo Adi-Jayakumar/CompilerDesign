@@ -71,17 +71,17 @@ struct Token
 {
     TOKEN_TYPE type = INVALID;
     std::string lexeme;
-    int line_no;
-    int column_no;
+    size_t line_no;
+    size_t column_no;
 
     Token() = default;
     Token(const TOKEN_TYPE _type,
           const std::string &_lexeme,
-          const int _line_no,
-          const int _column_no) : type(_type),
-                                  lexeme(_lexeme),
-                                  line_no(_line_no),
-                                  column_no(_column_no){};
+          const size_t _line_no,
+          const size_t _column_no) : type(_type),
+                                     lexeme(_lexeme),
+                                     line_no(_line_no),
+                                     column_no(_column_no){};
 };
 
 std::ostream &operator<<(std::ostream &out, const Token &tok);

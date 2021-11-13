@@ -14,7 +14,7 @@ Token Lexer::GetToken()
     // Skip any whitespace.
     while (isspace(LastChar) && file.peek() != EOF)
     {
-        if (LastChar == '\n' || LastChar == '\r')
+        if (LastChar == '\n')
         {
             ++line_no;
             column_no = 1;
@@ -22,6 +22,12 @@ Token Lexer::GetToken()
         file.get(LastChar);
         column_no++;
     }
+
+    if (ended)
+        return ReturnToken("", EOF_TOK);
+
+    if (file.peek() == EOF)
+        ended = true;
 
     if (isalpha(LastChar) || LastChar == '_')
     { // identifier: [a-zA-Z_][a-zA-Z_0-9]*

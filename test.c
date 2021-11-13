@@ -1,7 +1,11 @@
-int nothing(int x, int y)
+int nothing(void)
 {
-    int z;
-    x = 5;
-    z = 10;
-    return x + z;
+    if (true)
+    {
+        return 11;
+    }
+    else
+    {
+        return 12;
+    }
 }
