@@ -156,6 +156,9 @@ void SemanticAnalyser::AnalyseIfElseNode(IfElseNode *ie)
     if (cond != Type::BOOL && cond != Type::INT)
         ReportSemanticError("bad if condition", ie->loc);
 
+    if (cond == Type::INT)
+        ie->condition = std::make_shared<CoercionNode>(Type::BOOL, ie->condition, ie->loc);
+
     ie->then->Analyse(*this);
     if (ie->other != nullptr)
         ie->other->Analyse(*this);

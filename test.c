@@ -1,4 +1,12 @@
-float nothing(void)
+int nothing(void)
 {
-    return 1 + 2.0;
+    int x;
+    if (x)
+    {
+        return 1;
+    }
+    else
+    {
+        return 2;
+    }
 }

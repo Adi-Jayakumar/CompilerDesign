@@ -21,7 +21,7 @@ extern "C" DLLEXPORT float print_float(float X)
 
 extern "C"
 {
-    float nothing();
+    int nothing();
 }
 
 int main()

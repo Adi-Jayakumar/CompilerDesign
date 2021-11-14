@@ -69,8 +69,6 @@ llvm::Value *Compiler::CompileBinaryNode(BinaryNode *b)
             return llvm_builder.CreateICmpSLE(left, right, "int_leq");
         if (b->left->type == Type::FLOAT)
             return llvm_builder.CreateFCmpULE(left, right, "float_leq");
-        if (b->left->type == Type::BOOL)
-            return llvm_builder.CreateICmpULE(left, right, "bool_leq");
     }
     else if (b->loc.type == LT)
     {
@@ -78,8 +76,6 @@ llvm::Value *Compiler::CompileBinaryNode(BinaryNode *b)
             return llvm_builder.CreateICmpSLT(left, right, "int_lt");
         if (b->left->type == Type::FLOAT)
             return llvm_builder.CreateFCmpULT(left, right, "float_lt");
-        if (b->left->type == Type::BOOL)
-            return llvm_builder.CreateICmpULT(left, right, "bool_lt");
     }
     else if (b->loc.type == GE)
     {
@@ -87,8 +83,6 @@ llvm::Value *Compiler::CompileBinaryNode(BinaryNode *b)
             return llvm_builder.CreateICmpSGE(left, right, "int_geq");
         if (b->left->type == Type::FLOAT)
             return llvm_builder.CreateFCmpUGE(left, right, "float_geq");
-        if (b->left->type == Type::BOOL)
-            return llvm_builder.CreateICmpUGE(left, right, "bool_geq");
     }
     else if (b->loc.type == GT)
     {
@@ -96,8 +90,6 @@ llvm::Value *Compiler::CompileBinaryNode(BinaryNode *b)
             return llvm_builder.CreateICmpSGT(left, right, "int_gt");
         if (b->left->type == Type::FLOAT)
             return llvm_builder.CreateFCmpUGT(left, right, "float_gt");
-        if (b->left->type == Type::BOOL)
-            return llvm_builder.CreateICmpUGT(left, right, "bool_gt");
     }
     else if (b->loc.type == PLUS)
     {
@@ -161,28 +153,22 @@ llvm::Value *Compiler::CompileFunctionCallNode(FunctionCallNode *fc)
 llvm::Value *Compiler::CompileCoercionNode(CoercionNode *c)
 {
     llvm::Value *exp = c->exp->Compile(*this);
-    if (c->exp->type == Type::INT)
+    if (c->type == Type::INT)
     {
-        if (c->type == Type::BOOL)
-            return llvm_builder.CreateIntCast(exp, llvm::Type::getInt1Ty(llvm_context), true, "int_to_bool");
-        else if (c->type == Type::FLOAT)
-        {
-            return llvm_builder.CreateSIToFP(exp, llvm::Type::getFloatTy(llvm_context), "int_to_float");
-        }
-    }
-    else if (c->exp->type == Type::BOOL)
-    {
-        if (c->type == Type::INT)
+        if (c->exp->type == Type::BOOL)
             return llvm_builder.CreateIntCast(exp, llvm::Type::getInt32Ty(llvm_context), true, "bool_to_int");
-        else if (c->type == Type::FLOAT)
-            return llvm_builder.CreateFPCast(exp, llvm::Type::getFloatTy(llvm_context), "bool_to_float");
+        else if (c->exp->type == Type::FLOAT)
+            return llvm_builder.CreateFPToSI(exp, llvm::Type::getInt32Ty(llvm_context), "float_to_int");
     }
-    else if (c->exp->type == Type::FLOAT)
+    else if (c->type == Type::BOOL)
     {
-        if (c->type == Type::INT)
-            return llvm_builder.CreateIntCast(exp, llvm::Type::getInt32Ty(llvm_context), true, "float_to_int");
-        else if (c->type == Type::BOOL)
-            return llvm_builder.CreateIntCast(exp, llvm::Type::getInt1Ty(llvm_context), true, "float_to_bool");
+        if (c->exp->type == Type::INT)
+            return llvm_builder.CreateIntCast(exp, llvm::Type::getInt1Ty(llvm_context), false, "int_to_bool");
+    }
+    else if (c->type == Type::FLOAT)
+    {
+        if (c->exp->type == Type::INT)
+            return llvm_builder.CreateSIToFP(exp, llvm::Type::getFloatTy(llvm_context), "int_to_float");
     }
     // should never be reached
     return nullptr;
