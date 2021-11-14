@@ -1,11 +1,4 @@
-int nothing(void)
+float nothing(void)
 {
-    if (true)
-    {
-        return 11;
-    }
-    else
-    {
-        return 12;
-    }
+    return 1 + 2.0;
 }

@@ -28,7 +28,7 @@ class Compiler
     std::unique_ptr<llvm::Module> llvm_module;
     llvm::Function *cur_func;
 
-    llvm::Value *S_INT32_ZERO, *F32_ZERO, *BOOL_TRUE, *BOOL_FALSE;
+    llvm::Value *S_INT32_ZERO, *F32_ZERO, *F32_ONE, *BOOL_TRUE, *BOOL_FALSE;
 
     llvm::Type *TypeToLLVMType(const Type type);
     llvm::AllocaInst *CreateAlloca(const Type var_type, const std::string &name);
@@ -40,7 +40,8 @@ public:
     {
         llvm_module = std::make_unique<llvm::Module>("mini-c", llvm_context);
         S_INT32_ZERO = llvm::ConstantInt::get(llvm::Type::getInt32Ty(llvm_context), 0, true);
-        F32_ZERO = llvm::ConstantFP::get(llvm_context, llvm::APFloat(0.0));
+        F32_ZERO = llvm::ConstantFP::get(llvm_context, llvm::APFloat(float(0.0)));
+        F32_ONE = llvm::ConstantFP::get(llvm_context, llvm::APFloat(float(1.0)));
         BOOL_TRUE = llvm::ConstantInt::get(llvm::Type::getInt1Ty(llvm_context), 1, false);
         BOOL_FALSE = llvm::ConstantInt::get(llvm::Type::getInt1Ty(llvm_context), 0, false);
     };

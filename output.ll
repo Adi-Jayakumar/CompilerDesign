@@ -1,7 +1,8 @@
 ; ModuleID = 'mini-c'
 source_filename = "mini-c"
 
-define i32 @nothing() {
+define float @nothing() {
 function_body:
-  ret i32 11
+  ret float 3.000000e+00
+  ret float 0.000000e+00
 }

@@ -9,7 +9,7 @@ llvm::Value *Compiler::CompileIntNode(IntNode *i)
 
 llvm::Value *Compiler::CompileFloatNode(FloatNode *f)
 {
-    return llvm::ConstantFP::get(llvm_context, llvm::APFloat(f->val));
+    return llvm::ConstantFP::get(llvm_context, llvm::APFloat(float(f->val)));
 }
 
 llvm::Value *Compiler::CompileBoolNode(BoolNode *b)
@@ -26,7 +26,7 @@ llvm::Value *Compiler::CompileUnaryNode(UnaryNode *u)
         if (u->type == Type::INT)
             return llvm_builder.CreateSub(S_INT32_ZERO, right, "i_unary_neg");
         if (u->type == Type::FLOAT)
-            return llvm_builder.CreateSub(F32_ZERO, right, "f_unary_neg");
+            return llvm_builder.CreateFSub(F32_ZERO, right, "f_unary_neg");
     }
     if (u->loc.type == NOT)
     {
@@ -158,8 +158,33 @@ llvm::Value *Compiler::CompileFunctionCallNode(FunctionCallNode *fc)
     return llvm_builder.CreateCall(func, llvm_args, "func_call");
 }
 
-llvm::Value *Compiler::CompileCoercionNode(CoercionNode *)
+llvm::Value *Compiler::CompileCoercionNode(CoercionNode *c)
 {
+    llvm::Value *exp = c->exp->Compile(*this);
+    if (c->exp->type == Type::INT)
+    {
+        if (c->type == Type::BOOL)
+            return llvm_builder.CreateIntCast(exp, llvm::Type::getInt1Ty(llvm_context), true, "int_to_bool");
+        else if (c->type == Type::FLOAT)
+        {
+            return llvm_builder.CreateSIToFP(exp, llvm::Type::getFloatTy(llvm_context), "int_to_float");
+        }
+    }
+    else if (c->exp->type == Type::BOOL)
+    {
+        if (c->type == Type::INT)
+            return llvm_builder.CreateIntCast(exp, llvm::Type::getInt32Ty(llvm_context), true, "bool_to_int");
+        else if (c->type == Type::FLOAT)
+            return llvm_builder.CreateFPCast(exp, llvm::Type::getFloatTy(llvm_context), "bool_to_float");
+    }
+    else if (c->exp->type == Type::FLOAT)
+    {
+        if (c->type == Type::INT)
+            return llvm_builder.CreateIntCast(exp, llvm::Type::getInt32Ty(llvm_context), true, "float_to_int");
+        else if (c->type == Type::BOOL)
+            return llvm_builder.CreateIntCast(exp, llvm::Type::getInt1Ty(llvm_context), true, "float_to_bool");
+    }
+    // should never be reached
     return nullptr;
 }
 
@@ -209,24 +234,34 @@ void Compiler::CompileIfElseNode(IfElseNode *ie)
     llvm_builder.CreateCondBr(condition, then_bb, else_bb);
     llvm_builder.SetInsertPoint(then_bb);
 
-    ie->then->Compile(*this);
+    // ie->then->Compile(*this);
+    SP<BlockNode> then = std::dynamic_pointer_cast<BlockNode>(ie->then);
+    for (auto &decl : then->local_decls)
+        decl->Compile(*this);
+    for (auto &stmt : then->stmts)
+        stmt->Compile(*this);
+
     llvm_builder.CreateBr(after_bb);
 
     then_bb = llvm_builder.GetInsertBlock();
     cur_func->getBasicBlockList().push_back(else_bb);
     llvm_builder.SetInsertPoint(else_bb);
 
-    ie->other->Compile(*this);
+    // ie->other->Compile(*this);
+    SP<BlockNode> other = std::dynamic_pointer_cast<BlockNode>(ie->other);
+    if (other != nullptr)
+    {
+        for (auto &decl : other->local_decls)
+            decl->Compile(*this);
+        for (auto &stmt : other->stmts)
+            stmt->Compile(*this);
+    }
 
     llvm_builder.CreateBr(after_bb);
     else_bb = llvm_builder.GetInsertBlock();
 
     cur_func->getBasicBlockList().push_back(after_bb);
     llvm_builder.SetInsertPoint(after_bb);
-
-    llvm::PHINode *phi = llvm_builder.CreatePHI(llvm::Type::getInt1Ty(llvm_context), 2, "if_temp");
-    phi->addIncoming(nullptr, then_bb);
-    phi->addIncoming(nullptr, else_bb);
 }
 
 void Compiler::CompileReturnNode(ReturnNode *r)
@@ -250,13 +285,20 @@ void Compiler::CompileLocalDeclNode(LocalDeclNode *ld)
 
 void Compiler::CompileBlockNode(BlockNode *b)
 {
-    llvm::BasicBlock *block_body = llvm::BasicBlock::Create(llvm_context, "block_entry", cur_func);
+    llvm::BasicBlock *block_body = llvm::BasicBlock::Create(llvm_context, "block_body", cur_func);
+    llvm::BasicBlock *after = llvm::BasicBlock::Create(llvm_context, "after_block");
+
+    llvm_builder.CreateBr(block_body);
     llvm_builder.SetInsertPoint(block_body);
 
     for (auto &decl : b->local_decls)
         decl->Compile(*this);
     for (auto &stmt : b->stmts)
         stmt->Compile(*this);
+
+    llvm_builder.CreateBr(after);
+    cur_func->getBasicBlockList().push_back(after);
+    llvm_builder.SetInsertPoint(after);
 }
 
 void Compiler::CompileFunctionDeclNode(FunctionDeclNode *fd)
@@ -294,6 +336,15 @@ void Compiler::CompileFunctionDeclNode(FunctionDeclNode *fd)
         decl->Compile(*this);
     for (auto &stmt : body_as_block->stmts)
         stmt->Compile(*this);
+
+    if (fd->ret == Type::INT)
+        llvm_builder.CreateRet(S_INT32_ZERO);
+    else if (fd->ret == Type::BOOL)
+        llvm_builder.CreateRet(BOOL_FALSE);
+    else if (fd->ret == Type::FLOAT)
+        llvm_builder.CreateRet(F32_ZERO);
+    else
+        llvm_builder.CreateRet(nullptr);
 
     cur_func = nullptr;
 }
