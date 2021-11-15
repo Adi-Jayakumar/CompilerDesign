@@ -5,6 +5,7 @@
 class SemanticAnalyser
 {
     SymbolTable symbols;
+    FunctionDeclNode *cur_func;
 
 public:
     SemanticAnalyser() = default;

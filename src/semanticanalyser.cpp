@@ -166,9 +166,9 @@ void SemanticAnalyser::AnalyseIfElseNode(IfElseNode *ie)
 
 void SemanticAnalyser::AnalyseReturnNode(ReturnNode *r)
 {
-    if (r->ret != nullptr)
-        r->ret->Analyse(*this);
-    // TODO - Check return type matches current function
+    Type ret = (r->ret != nullptr) ? r->ret->Analyse(*this) : Type::VOID;
+    if (ret != cur_func->ret)
+        ReportSemanticError("Trying to return '" + ExprType::to_string(ret) + "' type from function with specified return type of '" + ExprType::to_string(cur_func->ret) + "'", r->loc);
 }
 
 void SemanticAnalyser::AnalyseLocalDeclNode(LocalDeclNode *ld)
