@@ -46,7 +46,7 @@ validate "./add"
 cd ../factorial 
 pwd
 rm -rf output.ll fact
-"$COMP" ./factorial.c
+"$COMP" ./factorial.cz
 $CLANG driver.cpp output.ll -o fact
 validate "./fact"
 
