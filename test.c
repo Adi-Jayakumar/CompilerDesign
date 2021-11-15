@@ -1,6 +1,10 @@
 extern float print_float(float X);
 
-void nothing(void)
+int nothing(void)
 {
-    print_float(3.1415926535);
+    int i;
+    int j;
+    i = 17;
+    j = 3;
+    return i % j;
 }

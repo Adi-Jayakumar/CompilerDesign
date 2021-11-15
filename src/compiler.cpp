@@ -25,14 +25,15 @@ llvm::Value *Compiler::CompileUnaryNode(UnaryNode *u)
     {
         if (u->type == Type::INT)
             return llvm_builder.CreateSub(S_INT32_ZERO, right, "i_unary_neg");
-        if (u->type == Type::FLOAT)
+        else if (u->type == Type::FLOAT)
             return llvm_builder.CreateFSub(F32_ZERO, right, "f_unary_neg");
     }
-    if (u->loc.type == NOT)
+    else if (u->loc.type == NOT)
     {
         if (u->type == Type::BOOL)
             return llvm_builder.CreateNot(right, "b_not");
     }
+    // dummy return - should never be reached
     return nullptr;
 }
 
@@ -49,81 +50,79 @@ llvm::Value *Compiler::CompileBinaryNode(BinaryNode *b)
     {
         if (b->left->type == Type::INT)
             return llvm_builder.CreateICmpEQ(left, right, "int_eq");
-        if (b->left->type == Type::FLOAT)
+        else if (b->left->type == Type::FLOAT)
             return llvm_builder.CreateFCmpUEQ(left, right, "float_eq");
-        if (b->left->type == Type::BOOL)
+        else if (b->left->type == Type::BOOL)
             return llvm_builder.CreateICmpEQ(left, right, "bool_eq");
     }
     else if (b->loc.type == NE)
     {
         if (b->left->type == Type::INT)
             return llvm_builder.CreateICmpNE(left, right, "int_neq");
-        if (b->left->type == Type::FLOAT)
+        else if (b->left->type == Type::FLOAT)
             return llvm_builder.CreateFCmpUNE(left, right, "float_neq");
-        if (b->left->type == Type::BOOL)
+        else if (b->left->type == Type::BOOL)
             return llvm_builder.CreateICmpNE(left, right, "bool_neq");
     }
     else if (b->loc.type == LE)
     {
         if (b->left->type == Type::INT)
             return llvm_builder.CreateICmpSLE(left, right, "int_leq");
-        if (b->left->type == Type::FLOAT)
+        else if (b->left->type == Type::FLOAT)
             return llvm_builder.CreateFCmpULE(left, right, "float_leq");
     }
     else if (b->loc.type == LT)
     {
         if (b->left->type == Type::INT)
             return llvm_builder.CreateICmpSLT(left, right, "int_lt");
-        if (b->left->type == Type::FLOAT)
+        else if (b->left->type == Type::FLOAT)
             return llvm_builder.CreateFCmpULT(left, right, "float_lt");
     }
     else if (b->loc.type == GE)
     {
         if (b->left->type == Type::INT)
             return llvm_builder.CreateICmpSGE(left, right, "int_geq");
-        if (b->left->type == Type::FLOAT)
+        else if (b->left->type == Type::FLOAT)
             return llvm_builder.CreateFCmpUGE(left, right, "float_geq");
     }
     else if (b->loc.type == GT)
     {
         if (b->left->type == Type::INT)
             return llvm_builder.CreateICmpSGT(left, right, "int_gt");
-        if (b->left->type == Type::FLOAT)
+        else if (b->left->type == Type::FLOAT)
             return llvm_builder.CreateFCmpUGT(left, right, "float_gt");
     }
     else if (b->loc.type == PLUS)
     {
         if (b->type == Type::INT)
             return llvm_builder.CreateAdd(left, right, "int_add");
-        if (b->type == Type::FLOAT)
+        else if (b->type == Type::FLOAT)
             return llvm_builder.CreateFAdd(left, right, "float_add");
     }
     else if (b->loc.type == MINUS)
     {
         if (b->type == Type::INT)
             return llvm_builder.CreateSub(left, right, "int_sub");
-        if (b->type == Type::FLOAT)
+        else if (b->type == Type::FLOAT)
             return llvm_builder.CreateFSub(left, right, "float_sub");
     }
     else if (b->loc.type == ASTERIX)
     {
         if (b->type == Type::INT)
             return llvm_builder.CreateMul(left, right, "int_mul");
-        if (b->type == Type::FLOAT)
+        else if (b->type == Type::FLOAT)
             return llvm_builder.CreateFMul(left, right, "float_mul");
     }
     else if (b->loc.type == DIV)
     {
         if (b->type == Type::INT)
             return llvm_builder.CreateSDiv(left, right, "int_div");
-        if (b->type == Type::FLOAT)
+        else if (b->type == Type::FLOAT)
             return llvm_builder.CreateFDiv(left, right, "float_div");
     }
     else if (b->loc.type == MOD)
-    {
-        // https: //llvm.org/doxygen/IntegerDivision_8cpp_source.html
-        return nullptr;
-    }
+        return llvm_builder.CreateSRem(left, right, "i_mod");
+    // dummy return - should never be reached
     return nullptr;
 }
 
@@ -184,7 +183,7 @@ llvm::AllocaInst *Compiler::CreateAlloca(const Type var_type, const std::string 
         return llvm_builder.CreateAlloca(llvm::Type::getInt1Ty(llvm_context), nullptr, name);
     else if (var_type == Type::FLOAT)
         return llvm_builder.CreateAlloca(llvm::Type::getFloatTy(llvm_context), nullptr, name);
-
+    // should never be reached - we should never try to create an alloca for a 'void' variable
     return nullptr;
 }
 
@@ -230,7 +229,6 @@ void Compiler::CompileWhileNode(WhileNode *ws)
 void Compiler::CompileIfElseNode(IfElseNode *ie)
 {
     llvm::Value *condition = ie->condition->Compile(*this);
-    // llvm::Function *cur_func = llvm_builder.GetInsertBlock()->getParent();
 
     llvm::BasicBlock *then_bb = llvm::BasicBlock::Create(llvm_context, "then", cur_func);
     llvm::BasicBlock *else_bb = llvm::BasicBlock::Create(llvm_context, "else");

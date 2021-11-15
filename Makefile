@@ -1,4 +1,4 @@
-CC		:= g++
+CC		:= clang++
 
 # -fsanitize=leak -fsanitize=address -fsanitize=undefined
 # `llvm-config-12 --cxxflags --ldflags --system-libs --libs all` expands to:
