@@ -146,6 +146,9 @@ void SemanticAnalyser::AnalyseWhileNode(WhileNode *w)
     if (cond != Type::BOOL && cond != Type::INT)
         ReportSemanticError("bad while condition", w->loc);
 
+    if (cond == Type::INT)
+        w->condition = std::make_shared<CoercionNode>(Type::BOOL, w->condition, w->condition->loc);
+
     w->body->Analyse(*this);
 }
 
@@ -157,7 +160,7 @@ void SemanticAnalyser::AnalyseIfElseNode(IfElseNode *ie)
         ReportSemanticError("bad if condition", ie->loc);
 
     if (cond == Type::INT)
-        ie->condition = std::make_shared<CoercionNode>(Type::BOOL, ie->condition, ie->loc);
+        ie->condition = std::make_shared<CoercionNode>(Type::BOOL, ie->condition, ie->condition->loc);
 
     ie->then->Analyse(*this);
     if (ie->other != nullptr)
