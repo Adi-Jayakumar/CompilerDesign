@@ -166,7 +166,8 @@ void SemanticAnalyser::AnalyseIfElseNode(IfElseNode *ie)
 
 void SemanticAnalyser::AnalyseReturnNode(ReturnNode *r)
 {
-    r->ret->Analyse(*this);
+    if (r->ret != nullptr)
+        r->ret->Analyse(*this);
     // TODO - Check return type matches current function
 }
 

@@ -1,12 +1,6 @@
-int nothing(void)
+extern float print_float(float X);
+
+void nothing(void)
 {
-    int x;
-    if (x)
-    {
-        return 1;
-    }
-    else
-    {
-        return 2;
-    }
+    print_float(3.1415926535);
 }

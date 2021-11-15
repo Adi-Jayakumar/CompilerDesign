@@ -21,11 +21,11 @@ extern "C" DLLEXPORT float print_float(float X)
 
 extern "C"
 {
-    int nothing();
+    void nothing();
 }
 
 int main()
 {
-    int i = nothing();
-    std::cout << "answer = " << i << std::endl;
+    nothing();
+    std::cout << "answer = " << std::endl;
 }

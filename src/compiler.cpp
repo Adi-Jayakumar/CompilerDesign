@@ -194,8 +194,10 @@ llvm::Type *Compiler::TypeToLLVMType(const Type type)
         return llvm::Type::getInt32Ty(llvm_context);
     else if (type == Type::BOOL)
         return llvm::Type::getInt1Ty(llvm_context);
-    else
+    else if (type == Type::FLOAT)
         return llvm::Type::getFloatTy(llvm_context);
+    else
+        return llvm::Type::getVoidTy(llvm_context);
 }
 
 void Compiler::CompileExprStmtNode(ExprStmtNode *es)
@@ -203,15 +205,32 @@ void Compiler::CompileExprStmtNode(ExprStmtNode *es)
     es->exp->Compile(*this);
 }
 
-void Compiler::CompileWhileNode(WhileNode *)
+void Compiler::CompileWhileNode(WhileNode *ws)
 {
+    llvm::BasicBlock *condition_block = llvm::BasicBlock::Create(llvm_context, "loop_condition", cur_func);
+    llvm::BasicBlock *loop_body_block = llvm::BasicBlock::Create(llvm_context, "loop_body");
+    llvm::BasicBlock *after_block = llvm::BasicBlock::Create(llvm_context, "after_loop");
+
+    llvm_builder.CreateBr(condition_block);
+    llvm_builder.SetInsertPoint(condition_block);
+
+    llvm::Value *condition = ws->condition->Compile(*this);
+    llvm_builder.CreateCondBr(condition, loop_body_block, after_block);
+
+    cur_func->getBasicBlockList().push_back(loop_body_block);
+    llvm_builder.SetInsertPoint(loop_body_block);
+
+    ws->body->Compile(*this);
+    llvm_builder.CreateBr(condition_block);
+
+    cur_func->getBasicBlockList().push_back(after_block);
+    llvm_builder.SetInsertPoint(after_block);
 }
 
 void Compiler::CompileIfElseNode(IfElseNode *ie)
 {
     llvm::Value *condition = ie->condition->Compile(*this);
-
-    llvm::Function *cur_func = llvm_builder.GetInsertBlock()->getParent();
+    // llvm::Function *cur_func = llvm_builder.GetInsertBlock()->getParent();
 
     llvm::BasicBlock *then_bb = llvm::BasicBlock::Create(llvm_context, "then", cur_func);
     llvm::BasicBlock *else_bb = llvm::BasicBlock::Create(llvm_context, "else");
@@ -252,7 +271,9 @@ void Compiler::CompileIfElseNode(IfElseNode *ie)
 
 void Compiler::CompileReturnNode(ReturnNode *r)
 {
-    llvm::Value *ret_val = r->ret->Compile(*this);
+    llvm::Value *ret_val = nullptr;
+    if (r->ret != nullptr)
+        ret_val = r->ret->Compile(*this);
     llvm_builder.CreateRet(ret_val);
 }
 
